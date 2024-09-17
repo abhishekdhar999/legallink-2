@@ -4,9 +4,9 @@ import { fstatSync } from 'fs';
  
  const uploadInCloudinary = async (filePath)=>{
     cloudinary.config({ 
-        cloud_name: 'dnjxcxxzt', 
-        api_key: '894674374357427', 
-        api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
+        cloud_name: "dnjxcxxzt", 
+        api_key: "894674374357427", 
+        api_secret: "jVp0wqWeuuR8610iLJqIqkODkUg" // Click 'View API Keys' above to copy your API secret
     });
 try {
     if(!filePath){
@@ -17,10 +17,10 @@ try {
         public_id:"images"
     })
 
-    console.log("file uploaded successfully",upload);
+    console.log("file uploaded successfully",uploadResult);
     return uploadResult;
 } catch (error) {
-    fs.unlinkSync(filePath)
+    // fs.unlinkSync(filePath)
     console.log("Error uploading file to cloudinary", error);
     // removing the file 
 }

@@ -8,7 +8,14 @@ const userSchema = new Schema(
         password: {type: String, required: true},
         phoneNumber:{type: Number,required:true},
         isVerifiedUser:{type:Boolean,default:false},
-        refreshTokkens:{type:String}
+        refreshTokken:{type:String},
+        avatar: {
+            type: String, // cloudinary url
+            required: true,
+        },
+        coverImage: {
+            type: String, // cloudinary url
+        },
     },
     {
         timestamps: true,
@@ -29,14 +36,14 @@ userSchema.methods.isPasswordCorrect = async function (password){
 }
 
 userSchema.methods.generateAccessTokken = async function (){
-jwt.sign(
+return jwt.sign(
     {
         _id : this._id,
         name : this.name,
         email:this.email
 
 },
-process.env.ACCESS_TOKEN_SECRET,
+"qwertyuiop0987654321poiuytrewq",
 {
 expiresIn:"10d"
 }
@@ -44,18 +51,17 @@ expiresIn:"10d"
 }
 
 userSchema.methods.generateRefreshTokken = async function (){
-    jwt.sign(
+   return jwt.sign(
         {
             _id : this._id,
             name : this.name,
             email:this.email
     
     },
-    process.env.ACCESS_TOKEN_SECRET,
+    "qwertyuiop0987654321poiuytrewq",
     {
     expiresIn:"1d"
     }
     )
 }
-const user  = module.exports("User",userSchema);
-module.exports = user;
+export const User  = mongoose.model("User",userSchema);
