@@ -11,11 +11,34 @@ const userSchema = new Schema(
         refreshTokken:{type:String},
         avatar: {
             type: String, // cloudinary url
-            required: true,
+            // required: true,
         },
         coverImage: {
             type: String, // cloudinary url
         },
+        watchHistory: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Video"
+            }
+        ],
+        role: {
+            type: String,
+            enum: ['Student', 'Teacher'],  // Role can be either "Student" or "Teacher"
+            required: true,
+          },
+          description:{
+            type:String,
+          },
+    subjects:{
+        type:[String],
+    },
+    charge:{
+        type:Number,
+    },
+    location:{
+        type:String,
+    }
     },
     {
         timestamps: true,
@@ -40,7 +63,8 @@ return jwt.sign(
     {
         _id : this._id,
         name : this.name,
-        email:this.email
+        email:this.email,
+        avatar:this.avatar,
 
 },
 "qwertyuiop0987654321poiuytrewq",

@@ -4,7 +4,7 @@ import {ApiError} from '../Utils/ApiError.js';
 import { ApiResponse } from '../Utils/ApiResponse.js';
 import { uploadInCloudinary } from "../Utils/fileUploadInCloud.js";
 import jwt from "jsonwebtoken"
-import mongoose from "mongoose";
+
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
@@ -26,59 +26,61 @@ const generateAccessAndRefereshTokens = async(userId) =>{
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log("In registerUser");
+    
+    const { name, email, password, phoneNumber,role, } = req.body;
   
-    const { name, email, password, phoneNumber } = req.body;
-  
-    if (!name || !email || !password || !phoneNumber) {
-      console.log("Missing fields");
+    if (!name || !email || !password || !phoneNumber || !role ) {
+    //   console.log("Missing fields");
       return res.status(400).json({ message: "All fields are required." });
     }
   
     const usersName = User.findOne(name);
     const usersEmail = User.findOne(email);
     const usersPhoneNumber = User.findOne(phoneNumber);
-    if (usersName || usersEmail || usersPhoneNumber) {
-        console.log("User already exists");
-        // throw error
-    }
+    // if (usersName || usersEmail || usersPhoneNumber) {
+    //     console.log("User already exists");
+    //     // throw error
+    // }
+// console.log("req.file",req.file);
+//     const avatarLocalPath = req.files?.avatar[0]?.path;
+// console.log(avatarLocalPath)
+//     let coverImageLocalPath;
+//     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+//         coverImageLocalPath = req.files.coverImage[0].path
+//     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    // if (!avatarLocalPath) {
+    //     throw new ApiError(400, "Avatar file is required 1")
+    // }
+    // console.log(avatarLocalPath)
+//  const avatars = await uploadInCloudinary(avatarLocalPath);
+//  const coverImage = await uploadInCloudinary(coverImageLocalPath);
 
-    let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path
-    }
-
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required 1")
-    }
-    console.log(avatarLocalPath)
- const avatar = await uploadInCloudinary(avatarLocalPath);
- const coverImage = await uploadInCloudinary(coverImageLocalPath);
-
-if(!avatar){
-    throw new ApiError(400, "Avatar object is required")
-}
+// if(!avatars){
+//     throw new ApiError(400, "Avatar object is required")
+// }
 
 const user = await User.create({
     name,
-    avatar:avatar.url,
+    // avatar:avatars.url,
     email,
     password,
     phoneNumber,
-    coverImage: coverImage?.url || "",
+    // coverImage: coverImage?.url || "",
+    role
 })
 
 const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
 );
 
+
 if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user")
 }
 
-return res.status(201).json(
+
+return res.status(200).json(
     new ApiResponse(200, createdUser, "User registered Successfully")
 )
     // Proceed with registration logic
@@ -237,4 +239,221 @@ if(!id){
         throw new ApiError(401, error?.message || "Invalid refresh token")
     }
   })
-  export { registerUser ,loginUser,logoutUser,refreshAccessToken};
+
+  const getUserChannelProfile = asyncHandler(async(req,res)=>{
+   
+    const userId = req.params.userId
+
+    if(!userId){
+        throw new ApiError(400,"user not found");
+    }
+
+  const channel =   User.aggregate([
+        {
+            $match:{
+                _id : userId
+            }
+    },
+    {
+            $lookup:{
+                from: 'subscriptions',
+                localField: '_id',
+                foreignField: 'channel',
+                as: "subscribers"
+            }
+    },
+    {
+        $lookup:{
+            from: 'subscriptions',
+            localField: '_id',
+            foreignField: 'subscriber',
+            as: "subscribedTo"
+        }
+    },
+    {
+        $addFields:{
+           
+            subscribersCount: {
+                $size: "$subscribers"
+            },
+            channelsSubscribedToCount: {
+                $size: "$subscribedTo"
+            },
+            isSubscribed: {
+                $in: [req.user._id, "$subscribedTo"]
+                }
+        }
+    },
+   {
+    $project:{
+        _id: 1,
+        name: 1,
+        email: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+       
+   }
+
+    },
+    
+
+])
+if (!channel?.length) {
+    throw new ApiError(404, "channel does not exists")
+}
+
+return res
+.status(200)
+.json(
+    new ApiResponse(200, channel[0], "User channel fetched successfully")
+)
+  })
+
+  const getWatchHistory = asyncHandler(async(req,res)=>{
+
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id:req.user._id
+        }
+    },
+    {
+        $lookup:{
+            from:"videos",
+            localField:"watchHistory",
+            foreignField:"_id",
+            as:"watchHistory",
+            pipeline:[
+                {
+                    $lookup:{
+                        from:"users",
+                        localField:"owners",
+                        foreignField:"_id",
+                        as:"owners",
+                        pipeline:[
+                            {
+                                $project:{
+                                    name:1,
+                                    email:1,
+                                    _id:1
+                            }
+                        }
+                        ]
+                    }
+                },
+                {
+                    $project:{
+                        title:1,
+                        views:1,
+                        _id:1,
+                        description:1
+                } 
+                }
+            ]
+        }
+    },
+    {
+        $addFields:{
+            owner:{
+                $first: "$owner"
+            }
+        }
+    }
+    ])
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(200,
+        user[0].watchHistory,
+        "users watch history fetched successfully")
+   )
+
+
+
+  })
+
+  const getAllUsersWhoseRoleIsTeacher = asyncHandler(async(req,res)=>{
+    const user = await User.find({role:"Teacher"}).select("-password")
+
+    if(!user){
+        throw new ApiError(400,"user whose role is teacher no found");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,
+            user,
+            "users whose role is teacher fetched successfully")
+            )
+  })
+
+  const getCurrentUser = asyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user._id).select("-password")
+
+    if(!user){
+        throw new ApiError(400,"user not found");
+    }
+    console.log("user",user)
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,
+            user,
+            "current user fetched successfully")
+            )
+    // .json(200,
+    //     new ApiResponse(
+    //         200,
+    //         user,
+    //     ))
+  })
+
+  const editUserProfile = asyncHandler(async (req, res) => {
+    const { name, charge, location, description,subjects } = req.body;
+    
+    // Debugging: Log request body
+    console.log("Request body:", req.body);
+    
+    // Fetch the user from the database
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  
+    // Update user fields
+    if(name){
+        user.name = name
+    }else{
+        user.name = user.name
+    }
+     
+    user.location = location || user.location;
+    user.description = description || user.description;
+  
+    // Only update the charge if the user is a Teacher
+    if (user.role === 'Teacher') {
+      user.charge = charge !== undefined ? charge : user.charge;
+    }
+    if (user.role === 'Teacher') {
+        user.subjects = subjects !== undefined ? subjects : user.charge;
+      }
+  
+    // Save the updated user document
+    try {
+      await user.save();
+      return res.status(200).json({
+        statusCode: 200,
+        data: user,
+        message: "User profile updated successfully",
+      });
+    } catch (error) {
+      console.error("Error saving user:", error);
+      return res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+  
+  export { registerUser ,loginUser,logoutUser,refreshAccessToken,getUserChannelProfile,getWatchHistory,getAllUsersWhoseRoleIsTeacher,getCurrentUser,editUserProfile};

@@ -2,11 +2,14 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './Pages/HomePage';
-import Dashboard from './Components/Dashboard';
-import LoginAdvocate from './Components/LoginAdvocate';
+
 import LoginUser from './Components/LoginUser';
-import SignupAdvocate from './Components/SignupAdvocate';
 import SignupUser from './Components/SignupUser';
+
+import Teachers from './Pages/Teachers';
+import ChatPage from './Pages/ChatPage';
+import UserProfile from './Pages/UserProfile';
+import Videos from './Pages/Videos';
 function App() {
   return (
     <>
@@ -15,11 +18,13 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path='/loginAdvocate' element={<LoginAdvocate/>}></Route>
-        <Route path="/loginUser" element={<LoginUser/>}> </Route>
-        <Route path="/signupUser" element={ <SignupUser/>}> </Route>
-        <Route path='/signupAdvocate' element={<SignupAdvocate/>}></Route>
+        <Route path="/loginuser" element={<LoginUser/>}> </Route>
+        <Route path="/signupuser" element={ <SignupUser/>}> </Route>
+        
+        <Route path='/teachers' element={<Teachers/>}></Route>
+        <Route path='/chats' element={<ChatPage/>}></Route>
+        <Route path='/userprofile' element={<UserProfile/>}></Route>
+        <Route path='/videos' element={<Videos/>}></Route>
       </Routes>
     </Router>
     </>

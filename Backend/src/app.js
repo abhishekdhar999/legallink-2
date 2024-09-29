@@ -1,7 +1,12 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
-import authRoutes from '../Routes/authRoutes.js'
+// routes
+import authRoutes from '../Routes/authRoutes.js';
+import videoRoutes from '../Routes/videoRoutes.js'
+
+import chatRoutes from '../Routes/chatRoutes.js'
+import messageRoutes from '../Routes/messageRoutes.js'
 const app = express();
 app.use(cors());
 app.use(express.json({limit:"16kb"}))
@@ -16,9 +21,10 @@ app.use(express.static('public'));
 
 
  app.use("/users",authRoutes);
+app.use("/videos",videoRoutes)
 
-
-
+app.use("/chat",chatRoutes)
+app.use("/message",messageRoutes)
 
 
 export {app};
