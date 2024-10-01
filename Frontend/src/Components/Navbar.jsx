@@ -83,9 +83,17 @@ const [login,setLogin] =  useState(false);
                 <li>
                     <a href="#" class="text-gray-900 dark:text-white hover:underline">About US</a>
                 </li>
+                <Link to={"/skills"}>
                  <li>
                     <a href="#" class="text-gray-900 dark:text-white hover:underline">Skill Share</a>
                 </li>
+                </Link>
+
+                <Link to={"/chats"}>
+                 <li>
+                    <a href="#" class="text-gray-900 dark:text-white hover:underline">chats</a>
+                </li>
+                </Link>
             </ul>
         </div>
     </div>

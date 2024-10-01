@@ -37,7 +37,7 @@ const [error,setError] = useState()
   return (
 <>
 
-<Navbar/>
+
 
     <div className='my-12'>
         {/* {teachers.data} */}
@@ -61,13 +61,20 @@ const [error,setError] = useState()
 
       
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+<div className="grid grid-cols-1 sm:grid-cols-1 gap-4 justify-items-center">
   {teachers?.map((teacher) => (
     <TeacherCard
       key={teacher._id} // Unique key
       image={teacher.avatar}
       userId={teacher._id}
       name={teacher.name}
+      charge={teacher.charge}
+      location={teacher.location}
+      subjects={teacher.subjects}
+      description={teacher.description}
+      email={teacher.email}
+      number={teacher.phoneNumber}
+      subscribersCount={teacher.subscribersCount}
     />
   ))}
 </div>

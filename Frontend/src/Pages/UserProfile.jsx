@@ -148,7 +148,7 @@ console.log("updatedUserData",updatedUserData)
 
   return (
     <>
-      <Navbar />
+     
 
       {model && (
         <div className='model flex justify-center'>
@@ -213,7 +213,7 @@ console.log("updatedUserData",updatedUserData)
                       <input
                         type="text"
                         name="subjects"
-                        value={user.location} // Bind to the state
+                        value={user.subjects} // Bind to the state
                         onChange={handleChange} // Handle changes
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                         placeholder="Type location"

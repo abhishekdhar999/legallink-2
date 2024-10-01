@@ -1,8 +1,99 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function TeacherCard({ name, image, userId }) {
+export default function TeacherCard({
+  name,
+  image,
+  userId,
+  number,
+  charge,
+  email,
+  description,
+  subjects,
+  location,
+  subscribersCount
+}) {
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async (channelId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/subscription/subscribe",
+        { channelId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessTokken')}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("response", response);
+
+      if (response.status === 200) {
+        alert("Subscribed successfully");
+        setSubscribed(true);  // Update state to reflect subscription
+      }
+    } catch (error) {
+      console.error("Subscription error", error);
+    }
+  };
+
+  const handleUnsubscribe = async (channelId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/subscription/unsubscribe",
+        { channelId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessTokken')}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log("response", response);
+
+      if (response.status === 200) {
+        setSubscribed(false);  // Update state to reflect unsubscription
+        alert("Unsubscribed successfully");
+      }
+    } catch (error) {
+      console.error("Unsubscription error", error);
+    }
+  };
+
+  const showToolTip = () => {
+    alert("Subscribe to see the videos");
+  };
+
+  // Check if user is already subscribed on component mount
+  useEffect(() => {
+    const checkSubscriptionStatus = async (channelId) => {
+      try {
+        const response = await axios.post(
+          `http://localhost:3001/subscription/checksubscribed`,
+          { channelId },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessTokken')}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.log("response", response);
+
+        if (response.status === 200) {
+          setSubscribed(true);  // Set state if user is subscribed
+        }
+      } catch (error) {
+        console.error("Check subscription error", error);
+      }
+    };
+
+    checkSubscriptionStatus(userId);
+  }, [userId]);
+
   const handleCreateChat = async (userId) => {
     const token = localStorage.getItem("accessTokken");
     try {
@@ -12,7 +103,7 @@ export default function TeacherCard({ name, image, userId }) {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json', // Fixed the typo here
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -26,93 +117,92 @@ export default function TeacherCard({ name, image, userId }) {
         window.location.href = '/chats';  // Redirect to chats page
       }
     } catch (error) {
-      console.error(error);
-      alert('An error occurred while creating the chat');
+      console.error("Chat creation error", error);
     }
   };
 
   return (
-    <>
-      <div className="w-full mx-12 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <div className="flex justify-end px-4 pt-4">
-          <button
-            id="dropdownButton"
-            data-dropdown-toggle="dropdown"
-            className="inline-block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-1.5"
-            type="button"
-          >
-            <span className="sr-only">Open dropdown</span>
-            <svg
-              className="w-5 h-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 16 3"
+    <div className="p-16">
+      <div className="p-8 bg-white shadow mt-24">
+        <div className="grid grid-cols-1 md:grid-cols-3">
+          <div className="grid grid-cols-3 text-center order-last md:order-first mt-20 md:mt-0">
+            <div>
+              <p className="font-bold text-gray-700 text-xl">{subscribersCount}</p>
+              <p className="text-gray-400">Subscribers</p>
+            </div>
+            <div className="space-x-8 flex justify-between mt-32 md:mt-0 md:justify-center ml-12">
+              {subscribed ? (
+                <Link to="/videos">
+                  <button className="text-white py-2 px-4 uppercase rounded bg-blue-400 hover:bg-blue-500 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5">
+                    Videos
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  onMouseOver={() => showToolTip()}
+                  className="text-white py-2 px-4 uppercase rounded bg-blue-400 hover:bg-blue-500 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5"
+                >
+                  Videos
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="w-48 h-48 bg-indigo-100 mx-auto rounded-full shadow-2xl absolute inset-x-0 top-0 -mt-24 flex items-center justify-center text-indigo-500">
+              <img className="w-full h-full object-cover rounded-full" src={image} alt={name} />
+            </div>
+          </div>
+
+          <div className="space-x-8 flex justify-between mt-32 md:mt-0 md:justify-center">
+            {subscribed ? (
+              <button
+                onClick={() => handleUnsubscribe(userId)}
+                className="text-white py-2 px-4 uppercase rounded bg-blue-400 hover:bg-blue-500 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5"
+              >
+                Unsubscribe
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSubscribe(userId)}
+                className="text-white py-2 px-4 uppercase rounded bg-blue-400 hover:bg-blue-500 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5"
+              >
+                Subscribe
+              </button>
+            )}
+
+            <button
+              onClick={() => handleCreateChat(userId)}
+              className="text-white py-2 px-4 uppercase rounded bg-gray-700 hover:bg-gray-800 shadow hover:shadow-lg font-medium transition transform hover:-translate-y-0.5"
             >
-              <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
-            </svg>
-          </button>
-          {/* <!-- Dropdown menu --> */}
-          <div
-            id="dropdown"
-            className="z-10 hidden text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
-          >
-            <ul className="py-2" aria-labelledby="dropdownButton">
-              <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                >
-                  Edit
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                >
-                  Export Data
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                >
-                  Delete
-                </a>
-              </li>
-            </ul>
+              Message
+            </button>
           </div>
         </div>
-        <div className="flex flex-col items-center pb-10">
-          <img
-            className="w-24 h-24 mb-3 rounded-full shadow-lg"
-            src={image}
-            alt={`${name}'s profile`}
-          />
-          <h5 className="mb-1 text-xl font-medium text-gray-900 dark:text-white">
-            {name}
-          </h5>
-          {/* <span className="text-sm text-gray-500 dark:text-gray-400">{subjects}</span> */}
-          {/* <span className="text-sm text-gray-500 dark:text-gray-400">{description}</span> */}
-          <div className="flex mt-4 md:mt-6">
-            <button
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Add friend
-            </button>
-            <Link >
-              <div
-                onClick={() => handleCreateChat(userId)}
-                className="py-2 px-4 ms-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-              >
-                Message
-              </div>
-            </Link>
-          </div>
+
+        <div className="mt-20 text-center border-b-2 border-b-black pb-12">
+          <h1 className="text-4xl font-medium text-gray-700">
+            {name} <span className="font-light text-gray-500"></span>
+          </h1>
+          <p className="font-light text-gray-600 mt-3">
+            <span className="font-extrabold text-xl">{location}</span>
+          </p>
+          <p className="mt-8 text-gray-500">
+            Charge per Hour: <span className="font-extrabold text-xl">{charge}</span>
+          </p>
+          <p className="mt-2 text-gray-500">{email}</p>
+          <p className="mt-2 text-gray-500">{number}</p>
+        </div>
+
+        <div className="mt-12 flex flex-col justify-center">
+          <p className="flex justify-center">Specialised In:</p>
+          <p className="text-gray-600 text-center font-light lg:px-16">{subjects}</p>
+        </div>
+
+        <div className="mt-12 flex border-t-4 border-b-black flex-col justify-center">
+          <p className="text-gray-600 text-center font-light lg:px-16">{description}</p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

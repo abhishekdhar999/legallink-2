@@ -152,7 +152,7 @@ export default function WebSocketComponent() {
   return (
     <>
    
-<Navbar/>
+
 
     <div className="flex h-[600px]">
       {/* Sidebar */}
@@ -169,7 +169,7 @@ export default function WebSocketComponent() {
                   : 'hover:bg-gray-100'
               }`}
             >
-              {chat.user[1].name}
+              {chat.user[0].name}
             </li>
           ))}
         </ul>

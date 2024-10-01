@@ -7,6 +7,8 @@ import videoRoutes from '../Routes/videoRoutes.js'
 
 import chatRoutes from '../Routes/chatRoutes.js'
 import messageRoutes from '../Routes/messageRoutes.js'
+import subscriptionRoutes from '../Routes/subscriptionRoutes.js'
+import skillsRoutes from '../Routes/skillsRoutes.js'
 const app = express();
 app.use(cors());
 app.use(express.json({limit:"16kb"}))
@@ -25,6 +27,6 @@ app.use("/videos",videoRoutes)
 
 app.use("/chat",chatRoutes)
 app.use("/message",messageRoutes)
-
-
+app.use("/subscription",subscriptionRoutes)
+app.use("/skills",skillsRoutes)
 export {app};

@@ -46,12 +46,13 @@ if (!user) {
         owner:id
     })
 
+    const populatedVideo = await Video.findById(video._id).populate("owner")
     if(!video){
         throw new ApiError(400, "video not found");
     }
 
     return res.status(201).json(
-        new ApiResponse(200, video, "video created Successfully")
+        new ApiResponse(200, populatedVideo, "video created Successfully")
     )
 });
 

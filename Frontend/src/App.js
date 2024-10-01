@@ -10,12 +10,17 @@ import Teachers from './Pages/Teachers';
 import ChatPage from './Pages/ChatPage';
 import UserProfile from './Pages/UserProfile';
 import Videos from './Pages/Videos';
+import Navbar from './Components/Navbar';
+import Skills from './Pages/Skills';
+import SkillsForm from './Components/SkillsForm';
 function App() {
   return (
     <>
     
 
+
     <Router>
+    <Navbar></Navbar>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/loginuser" element={<LoginUser/>}> </Route>
@@ -25,6 +30,8 @@ function App() {
         <Route path='/chats' element={<ChatPage/>}></Route>
         <Route path='/userprofile' element={<UserProfile/>}></Route>
         <Route path='/videos' element={<Videos/>}></Route>
+        <Route path='/skills' element={<Skills/>}></Route>
+        <Route path='/skillsform' element={<SkillsForm/>}></Route>
       </Routes>
     </Router>
     </>

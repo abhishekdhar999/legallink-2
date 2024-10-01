@@ -1,10 +1,9 @@
 import React, { useEffect,useState } from 'react'
 import VideoComponent from '../Components/VideoComponent'
 import axios from 'axios';
-import Navbar from '../Components/Navbar';
 export default function Videos() {
 
-const [videos,setVideos] =  useState([]);
+const [allVideos,setAllVideos] =  useState([]);
 
 useEffect(()=>{
   const fetchVideos = async () => {
@@ -17,25 +16,28 @@ useEffect(()=>{
     const vid =data.data
      console.log("data",vid)
     console.log(typeof(vid))
-     setVideos(vid[0]);
+     setAllVideos(vid);
     }
     fetchVideos();
     },[])
   return (
     <>
 
-    <Navbar></Navbar>
    
-       {/* {videos.map((video)=>{
-         return <div> 
-          <VideoComponent key={video._id} // always use a unique key when mapping
-            title={video.title}
-            description={video.description}
-            videoUrl={video.videoFile} // or whatever the field is for the video URL
-            coverImage={video.coverImage} />
-         </div>  
-       })}  */}
-
+   {allVideos.length > 0 ? <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  {allVideos.map((video) => (
+    <div key={video._id}> 
+      <VideoComponent
+        video ={video}
+        
+      />
+    </div>  
+  ))}
+</div>
+: <div>
+  no videos to show
+</div> }
+    
     </>
   )
 }

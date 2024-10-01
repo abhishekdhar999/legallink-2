@@ -11,7 +11,7 @@ const userSchema = new Schema(
         refreshTokken:{type:String},
         avatar: {
             type: String, // cloudinary url
-            // required: true,
+            required: true,
         },
         coverImage: {
             type: String, // cloudinary url
@@ -38,7 +38,16 @@ const userSchema = new Schema(
     },
     location:{
         type:String,
+    },
+    subscribersCount:{
+        type:Number,
+        default:0
+    },
+    subscribers:{
+        type:[ Schema.Types.ObjectId ],
+        ref:"User"
     }
+
     },
     {
         timestamps: true,
