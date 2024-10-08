@@ -4,7 +4,6 @@ import axios from 'axios';
 export default function SkillsCard({
     skill,
     user,
-    name,
     skillToLearn,
     skillToShare,
     skillLevel,

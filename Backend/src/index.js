@@ -2,7 +2,6 @@ import connectDB from "./db/db.js";
 import { app } from "./app.js";
 import dotenv from 'dotenv'
 import  { WebSocketServer,WebSocket } from 'ws';
-import path from 'path'
 import Message from "../Model/message.model.js";
 const port  =  3001;
 dotenv.config();
@@ -21,7 +20,7 @@ wsServer.on("connection", function connection(ws) {
     console.log("Connected to socket");
 
     // Send a message to the client when it connects
-    ws.send("hello connected to ws server");
+    // ws.send("hello connected to ws server");
 
     // Handle message events from the client
     ws.on('message', async (data) => {

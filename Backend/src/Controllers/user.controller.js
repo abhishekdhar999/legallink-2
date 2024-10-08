@@ -26,7 +26,7 @@ const generateAccessAndRefereshTokens = async(userId) =>{
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password, phoneNumber, role } = req.body;
+    const { name, email, password, phoneNumber, role ,floatLongitude,floatLatitude} = req.body;
 
     // Log the incoming request body and files
     console.log("req.body", req.body);
@@ -65,7 +65,11 @@ const registerUser = asyncHandler(async (req, res) => {
         phoneNumber,
         avatar: avatar.url,  // Save the avatar URL from Cloudinary
         coverImage: coverImage?.url || "",  // Save cover image if uploaded
-        role
+        role,
+        location: {
+            type: "Point",  // Specify the type as Point
+            coordinates: [floatLongitude, floatLatitude]  // Replace with actual longitude and latitude values
+        }
     });
 
     const createdUser = await User.findById(user._id).select("-password -refreshToken");
@@ -80,14 +84,17 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 });
   const loginUser = asyncHandler (async (req,res)=>{
-    const {email, password} = req.body;
+    const {email, password,latitude,longitude} = req.body;
     if(!email || !password){
         throw new ApiError(400,"fill the credentials")
     }
+    console.log("latitude backend",latitude)
+    console.log("longitude backend",longitude)
     const user = await User.findOne({email});
     if(!user){
         return new ApiError(404,"User not found");
         }
+        
 //     const isPasswordValid = await user.isPasswordCorrect(password)
 
 //    if (!isPasswordValid) {
@@ -100,9 +107,21 @@ const {accessToken,refreshToken} = await  generateAccessAndRefereshTokens(user._
 console.log("accesstoken",accessToken);
 console.log("refreshtoken",refreshToken);
 
-        const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    const loggedInUser = await User.findOneAndUpdate(
+        {_id:user._id},{
+            $set:{
+                location:{
+                     type:"Point",
+                    coordinates:[longitude,latitude]
+                }
+            }
+        },{
+            new:true
+        }
+        ).select("-password -refreshToken");
         console.log("loggedinuser",loggedInUser);
 
+        
         const options = {
             httpOnly: true,
              secure: false
@@ -447,4 +466,61 @@ return res
     }
   });
   
-  export { registerUser ,loginUser,logoutUser,refreshAccessToken,getUserChannelProfile,getWatchHistory,getAllUsersWhoseRoleIsTeacher,getCurrentUser,editUserProfile};
+  const findByLocation = asyncHandler(async (req, res) => {
+    const { long, lat } = req.params;
+    // User.getIndexes();
+    console.log("Received lat:", lat, "long:", long);
+
+    // Check if latitude or longitude is missing
+    if (!lat || !long) {
+        return res.status(400).json({ message: "Latitude or longitude not provided" });
+    }
+ 
+    const radiusInKilometers = 10;
+    
+    // Find users by location within the radius
+    const users = await User.find({
+        // "location.coordinates": { $eq: [long, lat] }
+
+        location: {
+
+            $geoWithin: {
+                $centerSphere: [
+                    [parseFloat(long), parseFloat(lat)], // [longitude, latitude]
+                    radiusInKilometers / 6378.1 // Convert km to radians
+                ]
+            }
+        }
+        // location: {
+        //     $elemMatch: {
+        //         coordinates: { $eq: longitude, $eq: latitude }
+        //     }
+        // }
+        // location: {
+                
+        //     $geoIntersects: {
+        //         $geometry: {
+        //             type: "Point",
+        //             coordinates: [parseFloat(long), parseFloat(lat)] // Order: [longitude, latitude]
+        //         }
+        //     }
+        // }
+    });
+console.log(users)
+    // Check if users exist or if the array is empty
+    if (!users || users.length === 0) {
+        return res.status(404).json({ message: "No users found for the given location" });
+    }
+
+    // Return successful response
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            users,
+            "Users successfully fetched by location"
+        )
+    );
+});
+
+
+  export { registerUser ,loginUser,logoutUser,refreshAccessToken,getUserChannelProfile,getWatchHistory,getAllUsersWhoseRoleIsTeacher,getCurrentUser,editUserProfile,findByLocation};

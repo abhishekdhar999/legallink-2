@@ -36,7 +36,7 @@ const userSchema = new Schema(
     charge:{
         type:Number,
     },
-    location:{
+    locationCity:{
         type:String,
     },
     subscribersCount:{
@@ -46,13 +46,19 @@ const userSchema = new Schema(
     subscribers:{
         type:[ Schema.Types.ObjectId ],
         ref:"User"
-    }
+    },
+    location: {
+        type:{ type: String, default: "Point" },
+        coordinates: [Number] // [longitude, latitude]
+    },
 
     },
     {
         timestamps: true,
     }
 )
+
+userSchema.index({ location: '2dsphere' });
 
 userSchema.pre('save',async function(next){
     if(!this.isModified("password")){

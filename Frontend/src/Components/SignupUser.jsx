@@ -15,6 +15,7 @@ export default function SignupUser() {
         role: '',
     });
 
+    
     // Handle form input changes
     const handleInputChange = (e) => {
         setFormData({
@@ -46,10 +47,41 @@ export default function SignupUser() {
       if (formData.avatar) {
         formDataToSend.append("avatar", formData.avatar);
       }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
   
-      try {
+          console.log("User's Latitude:", latitude);
+          console.log("User's Longitude:", longitude);
+  
+          const floatLongitude = parseFloat(longitude);
+          const floatLatitude = parseFloat(latitude);
+  
+          // Validate that they are numbers and not NaN
+          if (isNaN(floatLongitude) || isNaN(floatLatitude)) {
+              throw new Error("Longitude and latitude must be valid numbers");
+          }
+
+          // Update credentials to include latitude and longitude
+          const updatedFormData = {
+            ...formData,
+            floatLongitude,
+            floatLatitude,
+          };
+  
+          console.log('Updated credentials with location:', updatedFormData);
+  
+          // Call the API with updated credentials
+           sendData(updatedFormData);
+        }
+      )
+  
+      
           // Send POST request to backend API with formData
-          const response = await axios.post('http://localhost:3001/users/register', formDataToSend, {
+      const sendData = async (updatedFormData)=>{   
+        try { 
+        const response = await axios.post('http://localhost:3001/users/register', updatedFormData, {
               headers: {
                   'Content-Type': 'multipart/form-data', // Required for file upload
               },
@@ -63,11 +95,14 @@ export default function SignupUser() {
               alert('User created successfully');
               window.location.href = '/';  // Redirect to home page
           }
+        
       } catch (error) {
           // Handle error response
           console.error('Error registering user:', error);
           alert('Error registering user.');
       }
+    }
+    
   };
 
     return (

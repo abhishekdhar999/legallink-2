@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { upload } from "../Middleware/mullter.js";
-import { allSkills, postSkill } from "../src/Controllers/skills.controller.js";
+import { allSkills, postSkill, skillSearch } from "../src/Controllers/skills.controller.js";
 import { verifyJwt } from "../Middleware/auth.middleware.js";
 
 const router = Router();
@@ -16,5 +16,5 @@ router.route("/createskills").post(
   );
 
   router.route("/allskills").get(verifyJwt,allSkills);
-
+router.route("/search").get(verifyJwt,skillSearch)
 export default router;

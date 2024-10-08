@@ -65,7 +65,11 @@ const skillImageFile = req.files?.skillImage[0]?.path;
 })
 
 const allSkills = asyncHandler(async(req,res)=>{
-    const skills = await SKILLS.find({})
+
+   const userId = req.user._id;
+    const skills = await SKILLS.find({
+        owner: { $ne: userId }
+    })
     if(!skills){
         throw new ApiError(404,"No skills found")
     }
@@ -80,4 +84,35 @@ const allSkills = asyncHandler(async(req,res)=>{
     )
 })
 
-export {postSkill,allSkills}
+const skillSearch = asyncHandler(async (req, res) => {
+    const { skillToLearn, skillToShare } = req.query;
+  
+    // Make sure the query params are provided
+    if (!skillToLearn || !skillToShare) {
+      return res.status(400).json({ message: "Please provide both skills to learn and share." });
+    }
+  
+    // Construct the search query using MongoDB $regex
+    const searchQuery = {
+      $and: [
+        { skillToLearn: { $regex: skillToLearn, $options: 'i' } },  // Case-insensitive search
+        { skillToShare: { $regex: skillToShare, $options: 'i' } },  // Case-insensitive search
+      ],
+    };
+  
+    // Perform the search
+    const skills = await SKILLS.find(searchQuery);
+  
+    // If no skills are found, return a 404
+    if (!skills || skills.length === 0) {
+      throw new ApiError(404, "No skills found matching the criteria");
+    }
+  
+    // Return the results
+    return res.status(200).json(
+      new ApiResponse(200, skills, "Skills fetched successfully")
+    );
+  });
+  
+
+export {postSkill,allSkills,skillSearch}

@@ -4,7 +4,7 @@ import ThrowError from './Error';
 import axios from 'axios';
 export default function LoginUser() {
 
-  const [credentials, setCredentials] = useState({ email: "", password: "", repeatPassword: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "", repeatPassword: ""});
 
   const [error,setError] = useState()
 
@@ -31,31 +31,64 @@ setError("");
       return;
     }
 
-    // Call the API to create a new user
-    try {
-      const response = await axios.post('http://localhost:3001/users/login', credentials ,{
-       
-  headers:{
-    'Content-Type': 'application/json'
-  }
-      })
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
 
-      const res = response;
-      console.log("res",res.data);
-      const {accessToken} = res.data.data;
-      console.log("token",accessToken)
-      localStorage.setItem('accessTokken', accessToken);
-      if (res.status === 200) {
-        // If the user is created successfully, redirect to the login page
-          window.location.href = '/';
-        console.log(res.data);
-        } else {
-          setError("Invalid credentials")
-          }
-      console.log("response",res)
-    } catch (error) {
-      // setError("lgoin failed")
-    }
+        console.log("User's Latitude:", latitude);
+        console.log("User's Longitude:", longitude);
+
+        // Update credentials to include latitude and longitude
+        const updatedCredentials = {
+          ...credentials,
+          latitude,
+          longitude,
+        };
+
+        console.log('Updated credentials with location:', updatedCredentials);
+
+        // Call the API with updated credentials
+         sendCredentialsToAPI(updatedCredentials);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setError('Could not get location. Please try again.');
+      }
+    );
+    
+console.log("crdentials",credentials)
+ const sendCredentialsToAPI = async (updatedCredentials)=>{
+  try {
+    const response = await axios.post('http://localhost:3001/users/login', updatedCredentials ,{
+     
+headers:{
+  'Content-Type': 'application/json'
+}
+    })
+
+    
+
+
+
+    const res = response;
+    console.log("res",res.data);
+    const {accessToken} = res.data.data;
+    console.log("token",accessToken)
+    localStorage.setItem('accessTokken', accessToken);
+    if (res.status === 200) {
+
+      // If the user is created successfully, redirect to the login page
+        window.location.href = '/';
+      console.log(res.data);
+      } else {
+        setError("Invalid credentials")
+        }
+    console.log("response",res)
+  } catch (error) {
+    // setError("lgoin failed")
+  }
+ }   // Call the API to create a new user
+    
   };
 
   return (

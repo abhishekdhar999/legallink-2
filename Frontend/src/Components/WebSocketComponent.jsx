@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {jwtDecode }from 'jwt-decode';
-import Navbar from './Navbar';
+import {jwtDecode} from 'jwt-decode';
+
 export default function WebSocketComponent() {
   const [socket, setSocket] = useState(null);
   const [chats, setChats] = useState([]); // Store chat list
@@ -17,10 +17,7 @@ export default function WebSocketComponent() {
     if (token) {
       try {
         const decodedToken = jwtDecode(token); // Decode the token
-        console.log("decode",decodedToken)
-        setUserId(decodedToken._id);
-         // Assuming user_id is stored in the token
-         console.log("decodedToken.user_id",decodedToken._id)
+        setUserId(decodedToken._id); // Set userId from the token
         console.log("Logged in user ID:", decodedToken._id);
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -33,48 +30,38 @@ export default function WebSocketComponent() {
     const fetchChats = async () => {
       try {
         const token = localStorage.getItem("accessTokken");
-        console.log("token", token);
-
         const response = await axios.get("http://localhost:3001/chat/fetchchat", {
           headers: {
             Authorization: `Bearer ${token}`, // Sending the token in the request headers
           },
         });
 
-        console.log("Chats:", response.data.data.chats); // Handle fetched chat data
         setChats(response.data.data.chats);
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
     };
 
-    fetchChats(); // Calling the async function inside useEffect
+    fetchChats();
   }, []);
 
   // Fetch messages whenever a new user (chat) is selected
   useEffect(() => {
     const getMessages = async () => {
-      if (!chatId) return; // Only fetch messages if a chatId is available
+      if (!chatId) return;
 
       try {
         const token = localStorage.getItem("accessTokken");
-
         const response = await axios.get(
           `http://localhost:3001/message/getMessages/${chatId}`, // Sending chatId as a URL param
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Token in headers
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
 
-        if (!response.data) {
-          console.log("No messages");
-          return;
-        }
-
-        console.log("Messages response:", response.data);
         setMessages(response.data); // Set the messages for selected chat
       } catch (error) {
         console.log("Error fetching messages:", error);
@@ -82,19 +69,15 @@ export default function WebSocketComponent() {
     };
 
     getMessages();
-  }, [chatId,setChatId]); // Fetch messages whenever chatId changes
-
-  // Handle selecting a user/chat from the list
-  
+  }, [chatId]);
 
   const handleUserClick = (chat) => {
     if (chat.user[1]._id !== selectedUser) {
       setSelectedUser(chat.user[1]._id);
       setChatId(chat._id); // Set chatId to fetch messages for that chat
       setMessages([]); // Clear messages while fetching new ones
-    } // Clear messages while fetching new ones
+    }
   };
-
 
   // Handle sending a new message (using WebSocket + API for redundancy)
   const handleSendMessage = async () => {
@@ -113,17 +96,34 @@ export default function WebSocketComponent() {
         }
       );
 
+
+      // if (response.data) {
+      //   // Add the sent message to the local message list
+      //   setMessages((prevMessages) => [
+      //     ...prevMessages,
+      //     { sender: userId, content: newMessage }, // Update local message list
+      //   ]);
+      //   setNewMessage(""); // Clear input after sending
+
+      //   // Send the message via WebSocket as well
+      //   if (socket && socket.readyState === WebSocket.OPEN) {
+      //     const wsMessage = { chatId, sender: userId, content: newMessage };
+      //     socket.send(JSON.stringify(wsMessage)); // Send message via WebSocket
+      //   }
+      // }
+
+
       if (response.data) {
         // Add the sent message to the local message list
         setMessages((prevMessages) => [
           ...prevMessages,
-          { sender: userId, content: newMessage }, // Update local message list
+          { sender: { _id: userId }, content: newMessage }, // mimic server structure
         ]);
         setNewMessage(""); // Clear input after sending
-
+      
         // Send the message via WebSocket as well
         if (socket && socket.readyState === WebSocket.OPEN) {
-          const wsMessage = { chatId, sender:userId, content: newMessage };
+          const wsMessage = { chatId, sender: { _id: userId }, content: newMessage };
           socket.send(JSON.stringify(wsMessage)); // Send message via WebSocket
         }
       }
@@ -132,28 +132,34 @@ export default function WebSocketComponent() {
     }
   };
 
-  // WebSocket Connection
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:3001');
     setSocket(ws);
 
     // Listen for incoming messages from WebSocket
     ws.onmessage = (event) => {
-      const receivedMessage = event.data;
-      setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+      try {
+        const receivedMessage = JSON.parse(event.data);
+        console.log("Received WebSocket message:", receivedMessage);
+
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            sender: receivedMessage.sender,
+            content: receivedMessage.content,
+          }
+        ]);
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
     };
 
-    // Cleanup on component unmount
     return () => {
       ws.close();
     };
   }, []);
 
   return (
-    <>
-   
-
-
     <div className="flex h-[600px]">
       {/* Sidebar */}
       <div className="w-1/3 border-r border-gray-300 p-4">
@@ -169,7 +175,8 @@ export default function WebSocketComponent() {
                   : 'hover:bg-gray-100'
               }`}
             >
-              {chat.user[0].name}
+              {chat.user[1]._id===userId ? chat.user[0].name : chat.user[1].name }
+              
             </li>
           ))}
         </ul>
@@ -188,24 +195,24 @@ export default function WebSocketComponent() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-  {messages.length > 0 ? (
-    messages.map((msg, index) => (
-      <div
-        key={index}
-        className={`my-2 p-3 rounded-lg w-max max-w-xs break-words ${
-          msg.sender === userId
-            ? 'bg-green-200 self-end ml-auto text-right' // Sender's message (right)
-            : 'bg-gray-200 self-start text-left' // Receiver's message (left)
-        }`}
-      >
-        <p className="text-sm">{msg.content}</p>
-      </div>
-    ))
-  ) : (
-    <p>No messages yet.</p>
-  )}
+              {messages.length > 0 ? (
+                messages.map((msg, index) => (
+                  <div
+  key={index}
+  className={`my-2 p-3 rounded-lg w-max max-w-xs break-words ${
+    (typeof msg.sender === 'string' ? msg.sender : msg.sender._id) === userId
+      ? 'bg-green-200 self-end ml-auto text-right' // Sender's message (right)
+      : 'bg-gray-200 self-start text-left' // Receiver's message (left)
+  }`}
+>
+  <p className="text-sm">{msg.content}</p>
 </div>
 
+                ))
+              ) : (
+                <p>No messages yet.</p>
+              )}
+            </div>
 
             {/* Chat Input */}
             <div className="p-4 border-t border-gray-300 flex items-center">
@@ -233,7 +240,29 @@ export default function WebSocketComponent() {
         )}
       </div>
     </div>
-
-    </>
   );
 }
+
+
+
+
+
+
+
+
+// WebSocket Connection (mine code)
+  // useEffect(() => {
+  //   const ws = new WebSocket('ws://localhost:3001');
+  //   setSocket(ws);
+
+  //   // Listen for incoming messages from WebSocket
+  //   ws.onmessage = (event) => {
+  //     const receivedMessage = event.data;
+  //     setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+  //   };
+
+  //   // Cleanup on component unmount
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, []);
