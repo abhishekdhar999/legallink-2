@@ -96,23 +96,6 @@ export default function WebSocketComponent() {
         }
       );
 
-
-      // if (response.data) {
-      //   // Add the sent message to the local message list
-      //   setMessages((prevMessages) => [
-      //     ...prevMessages,
-      //     { sender: userId, content: newMessage }, // Update local message list
-      //   ]);
-      //   setNewMessage(""); // Clear input after sending
-
-      //   // Send the message via WebSocket as well
-      //   if (socket && socket.readyState === WebSocket.OPEN) {
-      //     const wsMessage = { chatId, sender: userId, content: newMessage };
-      //     socket.send(JSON.stringify(wsMessage)); // Send message via WebSocket
-      //   }
-      // }
-
-
       if (response.data) {
         // Add the sent message to the local message list
         setMessages((prevMessages) => [

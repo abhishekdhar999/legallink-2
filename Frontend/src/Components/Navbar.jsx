@@ -32,28 +32,28 @@ const [login,setLogin] =  useState(false);
     <>
       
 
-      <nav class="bg-white border-gray-200 dark:bg-gray-900">
-  <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
-    <a href="https://flowbite.com" class="flex items-center space-x-3 rtl:space-x-reverse">
-      <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
-      <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">FIND MY GURU</span>
-    </a>
+      <nav class=" border-gray-200  ">
+  <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4 bg-transparent">
+    
+     
+      <span class="logoHeading self-center text-2xl font-extrabold whitespace-nowrap text-[#CF9FFF] tracking-wide ">LearnSphere</span>
+   
     <div class="flex items-center space-x-6 rtl:space-x-reverse">
       {/* Small profile image */}
       {login && <Link to={"/userprofile"} >
-      <img src={user?.avatar} class="w-10 h-10 rounded-full" alt="Profile" />
+      <img src={user?.avatar} className="w-10 z-10 h-10 rounded-full" alt="Profile"  />
       </Link>}
       
       {login ? (
   <span
-    className="text-sm text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+    className="text-sm  text-purple-400 hover:underline cursor-pointer"
     onClick={handleLogout} // Add a logout function here
   >
     Logout
   </span>
 ) : (
   <Link to={"/loginuser"}>
-    <span className="text-sm text-blue-600 dark:text-blue-500 hover:underline">Login</span>
+    <span className="text-sm text-purple-400 z-10 hover:underline">Login</span>
   </Link>
 )}
       
@@ -61,39 +61,45 @@ const [login,setLogin] =  useState(false);
   </div>
 </nav>
 
-<nav class="bg-gray-50 dark:bg-gray-700">
+<nav class=" bg-transparent flex justify-center">
     <div class="max-w-screen-xl px-4 py-3 mx-auto">
         <div class="flex items-center">
             <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
                 <li>
                     <Link to={"/"}>
-                    <span  class="text-gray-900 dark:text-white hover:underline" aria-current="page">Home</span>
+                    <span  class="text-gray-400 hover:underline " aria-current="page">Home</span>
                     </Link>
                 </li>
                 <li>
                     <Link to={"/teachers"}>
-                    <span  class="text-gray-900 dark:text-white hover:underline">Teachers</span>
+                    <span  class="text-gray-400 hover:underline">Teachers</span>
                     </Link>
                 </li>
                 <li>
                   <Link to={"/videos"}>
-                    <span  class="text-gray-900 dark:text-white hover:underline">Videos</span>
+                    <span  class="text-gray-400 hover:underline">Videos</span>
                     </Link>
                 </li>
                 <Link to={"/aboutus"}>
                 <li>
-                    <a href="#" class="text-gray-900 dark:text-white hover:underline">About US</a>
+                    <a href="#" class="text-gray-400 hover:underline">About US</a>
                 </li>
                 </Link>
                 <Link to={"/skills"}>
                  <li>
-                    <a href="#" class="text-gray-900 dark:text-white hover:underline">Skill Share</a>
+                    <a href="#" class="text-gray-400 hover:underline">Skill Share</a>
                 </li>
                 </Link>
 
                 <Link to={"/chats"}>
                  <li>
-                    <a href="#" class="text-gray-900 dark:text-white hover:underline">chats</a>
+                    <a href="#" class="text-gray-400 hover:underline">chats</a>
+                </li>
+                </Link>
+
+                <Link to={"/communtiy"}>
+                 <li>
+                    <a href="#" class="text-gray-400 hover:underline">Create Community</a>
                 </li>
                 </Link>
             </ul>

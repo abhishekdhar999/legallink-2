@@ -201,7 +201,7 @@ console.log("updatedUserData",updatedUserData)
                       <input
                         type="text"
                         name="location"
-                        value={user.location} // Bind to the state
+                        value={user.locationCity} // Bind to the state
                         onChange={handleChange} // Handle changes
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                         placeholder="Type location"
@@ -270,7 +270,7 @@ console.log("updatedUserData",updatedUserData)
             </div>
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Location</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.location}</dd>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.locationCity}</dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">About</dt>

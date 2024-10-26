@@ -14,6 +14,9 @@ import Navbar from './Components/Navbar';
 import Skills from './Pages/Skills';
 import SkillsForm from './Components/SkillsForm';
 import AboutUs from './Pages/AboutUs';
+import Community from './Pages/Community';
+import Workplace from './Pages/Workplace';
+
 function App() {
   return (
     <>
@@ -33,6 +36,8 @@ function App() {
         <Route path='/videos' element={<Videos/>}></Route>
         <Route path='/skills' element={<Skills/>}></Route>
         <Route path='/skillsform' element={<SkillsForm/>}></Route>
+        <Route path='/communtiy' element={<Community/>}></Route>
+        <Route path='/workplace' element={<Workplace/>}></Route>
       </Routes>
     </Router>
     </>

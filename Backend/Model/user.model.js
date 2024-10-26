@@ -51,6 +51,10 @@ const userSchema = new Schema(
         type:{ type: String, default: "Point" },
         coordinates: [Number] // [longitude, latitude]
     },
+    Rating:{
+        type:Number,
+        ref:"User"
+    }
 
     },
     {

@@ -4,7 +4,7 @@ import {ApiError} from '../Utils/ApiError.js';
 import { ApiResponse } from '../Utils/ApiResponse.js';
 import { uploadInCloudinary } from "../Utils/fileUploadInCloud.js";
 import jwt from "jsonwebtoken"
-
+import { Rating } from "../../Model/rating.model.js";
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
@@ -522,5 +522,141 @@ console.log(users)
     );
 });
 
+const submitRating = asyncHandler(async(req,res)=>{
+    const loggedInUserId = req.user._id
+    if(!loggedInUserId){
+        throw new ApiError("login first");
+    }
+    const {rating , teacherInUsersId} =req.body
+    console.log("body",req.body)
+    if(!rating || !teacherInUsersId ){
+        throw new ApiError("rating not found");
+    }
+    try {
+        const beforeRating = await Rating.findOne({ teacherId: teacherInUsersId });
+    
+    let newRatingValue = rating;
+    let  newRatingCount = 1;
+    
+    if(beforeRating){
+        newRatingValue = (beforeRating.rating * beforeRating.ratingCount + rating) / (beforeRating.ratingCount + 1);
+        newRatingCount = beforeRating.ratingCount + 1;
+    }
+    
+        const createRating = await Rating.create({
+            rating : newRatingValue,
+            ratingCount:newRatingCount,
+            userId:loggedInUserId,
+            teacherId:teacherInUsersId
+        })
 
-  export { registerUser ,loginUser,logoutUser,refreshAccessToken,getUserChannelProfile,getWatchHistory,getAllUsersWhoseRoleIsTeacher,getCurrentUser,editUserProfile,findByLocation};
+        const populatedRating = await Rating.findById(createRating._id).populate("userId")
+        .populate("teacherId")
+    
+    } catch (error) {
+        console.log("catch error",error)
+    }
+    if(!createRating){
+        throw new ApiError("rating not found")
+    }
+       
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            populatedRating,
+            "rating is recorded sucsessfully"
+
+        )
+    )
+    
+    
+})
+
+const getRatingOfTeacher = asyncHandler(async(req,res)=>{
+const {id} = req.params
+
+const rating  = await Rating.findOne({
+    teacherId:id
+});
+
+const rate = 0;
+
+if(!rating){
+    return res
+    .status(200)
+    .json(
+rate
+    )
+}
+return res 
+.status(200)
+.json(
+    new ApiResponse(
+        200,
+        rating,
+        "ratign generated success"
+    )
+)
+})
+
+const allUsers = asyncHandler(async(req,res)=>{
+    const users = await User.find()
+    if(!users){
+        throw new ApiError("no users to fetch");
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            users,
+            "users fetched successfully"
+        )
+    )
+})
+
+  export { registerUser ,loginUser,logoutUser,refreshAccessToken,getUserChannelProfile,getWatchHistory,getAllUsersWhoseRoleIsTeacher,getCurrentUser,editUserProfile,findByLocation,submitRating,getRatingOfTeacher,allUsers};
+
+
+  //     [
+    //         {
+    //         $set:{
+    //             rating:{
+    //                 $cond:{
+    //                     if: { $gt: [{ $ifNull: ["$ratingCount", 0] }, 0] },
+    //                     then:{
+    //                         $divide:[
+    //                             {
+    //                                 $add:[
+    //                                     {
+    //                                         $multiply:[
+    //                                             {$ifNull:['rating',0]},
+    //                                             {$ifNull:['ratingCount',0]}
+    //                                         ]
+    //                                     },
+    //                                     rating
+    //                                 ]
+    //                             },
+    //                             {
+    //                                 $add:[{ifNull:['$ratingCount',0]},1]
+    //                             }
+    //                         ]
+    //                     },
+    //                     else:{
+    //                         rating
+    //                     }
+                        
+    //                 }
+    //             },
+                
+    //             ratingCount:{
+    //                 $add:[
+    //                     {$ifNull:['ratingCount',0]},1
+    //                 ]
+    //             }
+    //         }
+    //     }
+    //     ]
+    // ).populate('')

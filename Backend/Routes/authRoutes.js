@@ -5,7 +5,7 @@ import { upload } from '../Middleware/mullter.js';
 import { verifyJwt } from '../Middleware/auth.middleware.js';
 
 // routes
-import { loginUser, logoutUser, refreshAccessToken, registerUser,getUserChannelProfile, getWatchHistory, getAllUsersWhoseRoleIsTeacher, getCurrentUser, editUserProfile, findByLocation } from '../src/Controllers/user.controller.js';
+import { loginUser, logoutUser, refreshAccessToken, registerUser,getUserChannelProfile, getWatchHistory, getAllUsersWhoseRoleIsTeacher, getCurrentUser, editUserProfile, findByLocation ,submitRating, getRatingOfTeacher, allUsers} from '../src/Controllers/user.controller.js';
 
 
 const router = Router();
@@ -27,4 +27,10 @@ router.route("/roleteachers").get(getAllUsersWhoseRoleIsTeacher);
 router.route('/currentuser').get(verifyJwt,getCurrentUser);
 router.route("/edituser").put(verifyJwt,editUserProfile);
 router.route("/searchbylocation/:long/:lat").get(verifyJwt,findByLocation)
+router.route("/submitrating").post(verifyJwt,submitRating)
+router.route("/getrating/:id").get(verifyJwt,getRatingOfTeacher)
+router.route("/allusers").get(verifyJwt,allUsers)
+
+
+
 export default router;
